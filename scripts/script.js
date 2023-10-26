@@ -1,4 +1,4 @@
-const tablesList = [
+let tablesList = [
 	{
 		table: 1,
 		seats: 4,
@@ -50,15 +50,21 @@ const tablesList = [
 		reservations: [],
 	},
 ]
-
 // settings
 const timeOpen = 11
 const timeClosed = 18
 let time = timeOpen + `:00`
 
-window.onload = function app() {
-	renderTables(tablesList)
+const storedTablesList = JSON.parse(localStorage.getItem('tablesList'))
+
+if (storedTablesList) {
+	tablesList = storedTablesList
 	rendersReservationHours(timeOpen, timeClosed, tablesList)
+	renderTables(tablesList)
+}
+if (!storedTablesList) {
+	rendersReservationHours(timeOpen, timeClosed, tablesList)
+	renderTables(tablesList)
 }
 
 // This function populates the hourOpen array with each hour the restaurant is open
@@ -67,25 +73,33 @@ function generatesOpenHours(timeOpen, timeClosed, tablesList) {
 		throw new Error('Opening time must be less than closing time.')
 	}
 
+	const storedTablesList = JSON.parse(localStorage.getItem('tablesList'))
+
 	let hoursOpen = []
 	let count = timeOpen
 
 	while (count < timeClosed) {
 		hoursOpen.push(count + `:00`)
-		for (let table of tablesList) {
-			if (!Array.isArray(table.reservations)) {
-				table.reservations = []
-			}
-			table.reservations.push({ time: count + `:00`, reserved: false })
-		}
 
-		if (count !== timeClosed - 1) {
-			hoursOpen.push(count + `:30`)
+		if (!storedTablesList && tablesList) {
 			for (let table of tablesList) {
 				if (!Array.isArray(table.reservations)) {
 					table.reservations = []
 				}
-				table.reservations.push({ time: count + `:30`, reserved: false })
+				table.reservations.push({ time: count + `:00`, reserved: false })
+			}
+		}
+
+		if (count !== timeClosed - 1) {
+			hoursOpen.push(count + `:30`)
+
+			if (!storedTablesList && tablesList) {
+				for (let table of tablesList) {
+					if (!Array.isArray(table.reservations)) {
+						table.reservations = []
+					}
+					table.reservations.push({ time: count + `:30`, reserved: false })
+				}
 			}
 		}
 
@@ -110,15 +124,12 @@ function rendersReservationHours(timeOpen, timeClosed, tablesList) {
 	}
 }
 
-const tablesContainer = document
-	.getElementById('tables')
-	.addEventListener('click', function (e) {
-		if (e.target.className.includes('table')) {
-			const table = e.target.dataset.table
-
-			bookTable(table, e)
-		}
-	})
+document.getElementById('tables').addEventListener('click', function (e) {
+	if (e.target.className.includes('table')) {
+		const table = e.target.dataset.table
+		bookTable(table, e)
+	}
+})
 
 const timeElement = document.getElementById('time')
 timeElement.addEventListener('change', (event) => {
@@ -161,6 +172,10 @@ function bookTable(tableNumber, event) {
 			tablesList[tableIndex].reservations[currentIndex].reserved = true
 			currentIndex++
 		}
-		console.log(tablesList)
 	}
+	localStorage.setItem('tablesList', JSON.stringify(tablesList))
 }
+
+// Todo:
+// When a user clicks on the seat # for a table, the text background will turn red. This needs fixed
+// Prevent a user from booking more than one table at a given time
