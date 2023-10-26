@@ -99,12 +99,12 @@ function generatesOpenHours(timeOpen, timeClosed, tablesList) {
 function rendersReservationHours(timeOpen, timeClosed, tablesList) {
 	const openHours = generatesOpenHours(timeOpen, timeClosed, tablesList)
 	const hoursContainer = document.getElementById('time')
-	// console.log(`Hours Open ${openHours}`)
+	let count = -1
 	for (const hour of openHours) {
-		// console.log(hour)
+		count++
 		hoursContainer.insertAdjacentHTML(
 			'beforeend',
-			`<option class="bg-gray-200 text-black" data-hour="${hour}">${hour}</option>
+			`<option class="bg-gray-200 text-black" data-hour="${count}">${hour}</option>
         `
 		)
 	}
@@ -115,7 +115,8 @@ const tablesContainer = document
 	.addEventListener('click', function (e) {
 		if (e.target.className.includes('table')) {
 			const table = e.target.dataset.table
-			bookTable(table)
+
+			bookTable(table, e)
 		}
 	})
 
@@ -141,7 +142,25 @@ function renderTables(tablesList) {
 	}
 }
 
-function bookTable(table) {
-	console.log(table)
-	console.log(time)
+function bookTable(tableNumber, event) {
+	event.target.classList.toggle('hover:bg-green-400')
+	event.target.classList.toggle('bg-red-400')
+	const hoursContainer = document.getElementById('time')
+
+	const selectedTime = hoursContainer.value
+	const timesOpen = generatesOpenHours(timeOpen, timeClosed, tablesList)
+	const selectedTimeIndex = timesOpen.findIndex((time) => time === selectedTime)
+	const tableIndex = tablesList.findIndex(
+		(currentTable) => currentTable.table == tableNumber
+	)
+	const twoHourBlock = 4
+	let currentIndex = selectedTimeIndex
+
+	for (let i = 0; i < twoHourBlock; i++) {
+		if (tablesList[tableIndex].reservations[currentIndex]) {
+			tablesList[tableIndex].reservations[currentIndex].reserved = true
+			currentIndex++
+		}
+		console.log(tablesList)
+	}
 }
