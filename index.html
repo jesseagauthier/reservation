@@ -17,12 +17,20 @@
 				<select
 					title="time"
 					id="time"
-					class="py-2 px-9 border rounded-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+					class="bg-gray-500 py-2 px-9 border rounded-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
 				></select>
 			</form>
 		</header>
-		<main class="p-4 w-2/4 mx-auto">
-			<div id="tables" class="grid grid-cols-4"></div>
+		<main class="p-4 w-2/4 mx-auto flex flex-col justify-center">
+			<div
+				id="tables"
+				class="grid grid-cols-4 gap-4 shadow-lg border-slate-500 p-5 rounded-lg"
+			></div>
+			<button
+				class="text-center py-3 px-4 bg-green-600 mt-7 text-white rounded-lg hover:bg-green-800 text-2xl shadow mx-auto w-64"
+			>
+				Book
+			</button>
 		</main>
 		<!-- Section that shows available times -->
 
