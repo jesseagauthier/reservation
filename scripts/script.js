@@ -137,19 +137,14 @@ function rendersReservationHours(timeOpen, timeClosed, tablesList) {
 	}
 }
 // Event listener to detect clicks on tables for booking.
-document.getElementById('tables').addEventListener('click', function (e) {
-	if (e.target.className.includes('table')) {
-		const table = e.target.parentElement.dataset.table
-		if ((e.target.dataset.selected = 'true')) {
-			bookTable(table, e)
-		}
-
-		e.target.dataset.selected = 'true'
+document.getElementById('tables').addEventListener('click', function (event) {
+	if (event.target.className.includes('table')) {
+		const table = event.target.dataset.table
 		const restrict = restrictSelected()
 		if (!restrict) {
-			bookTable(table, e)
-			console.log(restrict)
+			bookTable(table, event)
 		} else {
+			alert('One Table Per Booking')
 			return
 		}
 	}
@@ -181,7 +176,7 @@ function renderTables(tablesList) {
 
 // This function handles the booking of a table for a given time.
 // It toggles the table's visual representation and updates the reservation status.
-function bookTable(tableNumber, event) {
+function bookTable(table, event) {
 	if (event.target.tagName == 'span' || event.target.tagName == 'p') {
 		event.target.parentElement.classList.toggle('hover:bg-green-400')
 		event.target.parentElement.classList.toggle('bg-orange-400')
@@ -193,11 +188,14 @@ function bookTable(tableNumber, event) {
 
 	const hoursContainer = document.getElementById('time')
 	const selectedTime = hoursContainer.value
+
 	const timesOpen = generatesOpenHours(timeOpen, timeClosed, tablesList)
+
 	const selectedTimeIndex = timesOpen.findIndex((time) => time === selectedTime)
 	const tableIndex = tablesList.findIndex(
-		(currentTable) => currentTable.table == tableNumber
+		(currentTable) => currentTable.table == table
 	)
+	console.log(tableIndex)
 	const twoHourBlock = 4
 	let currentIndex = selectedTimeIndex
 
@@ -227,6 +225,8 @@ function restrictSelected() {
 
 // Todo:
 // Prevent the user from adding more than one table per booking
+
+// Uncaught TypeError: tablesList[tableIndex] is undefined
 
 // Notes:
 
