@@ -101,22 +101,20 @@ function renderReservationHours(openingTime, closingTime, tableList) {
 	})
 }
 
-// Event listener for table booking
-document.getElementById('tables').addEventListener('click', function (event) {
-	const previouslySelected = document.querySelectorAll("[data-selected='true']")
-	const table = event.target.dataset.table
-
-	if (previouslySelected.length === 1) {
-		removeSelected(previouslySelected)
-		bookTable(table, event)
-	} else {
-		bookTable(table, event)
-	}
-})
-
-function removeSelected(previouslySelected) {
-	previouslySelected[0].classList.remove('bg-orange-400')
-	previouslySelected[0].dataset.selected = 'false'
+// Function to render tables
+function renderTables(tableList) {
+	const tablesContainer = document.getElementById('tables')
+	tableList.forEach((table) => {
+		tablesContainer.insertAdjacentHTML(
+			'beforeend',
+			`
+      <div class="table border p-4 rounded col-span-1 cursor-pointer shadow border-3 hover:bg-green-400 hover:border-gray-500" data-table="${table.table}">
+        <span class="font-bold text-xl">Seats ${table.seats}</span>
+        <p class="mt-2">Table: ${table.table}</p>
+      </div>
+    `
+		)
+	})
 }
 
 // Event listener for time dropdown
@@ -126,62 +124,40 @@ timeElement.addEventListener('change', (event) => {
 	console.log(currentTime)
 })
 
-// Function to render tables
-function renderTables(tableList) {
-	const tablesContainer = document.getElementById('tables')
-	tableList.forEach((table) => {
-		tablesContainer.insertAdjacentHTML(
-			'beforeend',
-			`
-      <div class="table border p-4 rounded col-span-1 cursor-pointer shadow border-3 hover:bg-green-400 hover:border-gray-500" data-table="${table.table}">
-        <span class="font-bold text-xl" data-table="${table.table}">Seats ${table.seats}</span>
-        <p class="mt-2" data-table="${table.table}">Table: ${table.table}</p>
-      </div>
-    `
-		)
-	})
-}
 // This function handles the booking of a table for a given time.
 // It toggles the table's visual representation and updates the reservation status.
 function bookTable(table, event) {
-	if (
-		event.target.parentElement.dataset.selected == 'true' ||
-		event.target.dataset.selected == 'true'
-	) {
-		event.target.classList.toggle('hover:bg-green-400')
-		event.target.classList.toggle('bg-orange-400')
+	let targetElement
+
+	if (!event.target.dataset.table) {
+		targetElement = event.target.parentElement
+		targetElement.dataset.selected = 'true'
+	} else {
+		targetElement = event.target
+		targetElement.dataset.selected = 'true'
 	}
 
-	if (event.target.tagName == 'span' || event.target.tagName == 'p') {
-		event.target.parentElement.classList.toggle('hover:bg-green-400')
-		event.target.parentElement.classList.toggle('bg-orange-400')
-		event.parentElement.dataset.selected = 'true'
-	}
-	if (event.target.tagName == 'DIV') {
-		event.target.classList.toggle('hover:bg-green-400')
-		event.target.classList.toggle('bg-orange-400')
-		event.target.dataset.selected = 'true'
-	}
+	targetElement.classList.toggle('bg-orange-400')
 
-	const hoursContainer = document.getElementById('time')
-	const selectedTime = hoursContainer.value
+	// const hoursContainer = document.getElementById('time')
+	// const selectedTime = hoursContainer.value
 
-	const timesOpen = generateOpenHours(openingTime, closingTime, tableList)
+	// const timesOpen = generateOpenHours(openingTime, closingTime, tableList)
 
-	const selectedTimeIndex = timesOpen.findIndex((time) => time === selectedTime)
-	const tableIndex = tablesList.findIndex(
-		(currentTable) => currentTable.table == table
-	)
-	const twoHourBlock = 4
-	let currentIndex = selectedTimeIndex
+	// const selectedTimeIndex = timesOpen.findIndex((time) => time === selectedTime)
+	// const tableIndex = tablesList.findIndex(
+	// 	(currentTable) => currentTable.table == table
+	// )
+	// const twoHourBlock = 4
+	// let currentIndex = selectedTimeIndex
 
-	for (let i = 0; i < twoHourBlock; i++) {
-		if (tableList[tableIndex].reservations[currentIndex]) {
-			tableList[tableIndex].reservations[currentIndex].reserved = true
-			currentIndex++
-		}
-	}
-	localStorage.setItem('tablesList', JSON.stringify(tableList))
+	// for (let i = 0; i < twoHourBlock; i++) {
+	// 	if (tableList[tableIndex].reservations[currentIndex]) {
+	// 		tableList[tableIndex].reservations[currentIndex].reserved = true
+	// 		currentIndex++
+	// 	}
+	// }
+	// localStorage.setItem('tablesList', JSON.stringify(tableList))
 }
 
 function restrictSelected() {
@@ -191,6 +167,29 @@ function restrictSelected() {
 
 renderReservationHours(openingTime, closingTime, tableList)
 renderTables(tableList)
+
+// Event listener for table booking
+const tables = document.querySelectorAll('.table')
+for (const table of tables) {
+	table.addEventListener('click', checkForSelected)
+}
+
+function checkForSelected(event) {
+	const previouslySelected = document.querySelectorAll("[data-selected='true']")
+	const table = event.target.dataset.table
+
+	if (previouslySelected.length === 1) {
+		removeSelected(previouslySelected)
+		bookTable(table, event)
+	} else {
+		bookTable(table, event)
+	}
+}
+
+function removeSelected(previouslySelected) {
+	previouslySelected[0].classList.remove('bg-orange-400')
+	previouslySelected[0].dataset.selected = 'false'
+}
 
 // Todo:
 // Prevent the user from adding more than one table per booking
