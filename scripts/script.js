@@ -67,7 +67,7 @@ let currentTime = openingTime + ':00'
 let count = 0
 
 // Load tables from local storage or create an empty list
-let tableList = JSON.parse(localStorage.getItem('tablesList')) || tablesList
+const tableList = JSON.parse(localStorage.getItem('tablesList')) || tablesList
 
 // Function to generate open hours
 function generateOpenHours(openingTime, closingTime, tableList) {
@@ -181,11 +181,15 @@ function removeSelected(previouslySelected) {
 }
 
 function tableBook() {
-	const previouslySelected = checkForSelected()
-	removeSelected(previouslySelected)
+	removeSelected(checkForSelected())
 	const tableIndex = returnsTableIndex()
-	const timeIndex = returnsTimeIndex(tableIndex)
-	console.log(timeIndex)
+	let timeIndex = returnsTimeIndex(tableIndex)
+	tableList[tableIndex].reservations[timeIndex].reserved = true
+
+	for (let i = 0; i <= 2; i++) {
+		timeIndex++
+		tableList[tableIndex].reservations[timeIndex].reserved = true
+	}
 }
 
 // Todo:
