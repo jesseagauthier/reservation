@@ -136,28 +136,22 @@ function bookTable(table, event) {
 		targetElement = event.target
 		targetElement.dataset.selected = 'true'
 	}
-
 	targetElement.classList.toggle('bg-orange-400')
 
-	// const hoursContainer = document.getElementById('time')
-	// const selectedTime = hoursContainer.value
+	const hoursContainer = document.getElementById('time')
+	const selectedTime = hoursContainer.value
 
-	// const timesOpen = generateOpenHours(openingTime, closingTime, tableList)
+	const currentTable = targetElement.dataset.table
+	const tableIndex = tableList.findIndex((table) => table.table == currentTable)
 
-	// const selectedTimeIndex = timesOpen.findIndex((time) => time === selectedTime)
-	// const tableIndex = tablesList.findIndex(
-	// 	(currentTable) => currentTable.table == table
-	// )
-	// const twoHourBlock = 4
-	// let currentIndex = selectedTimeIndex
-
-	// for (let i = 0; i < twoHourBlock; i++) {
-	// 	if (tableList[tableIndex].reservations[currentIndex]) {
-	// 		tableList[tableIndex].reservations[currentIndex].reserved = true
-	// 		currentIndex++
-	// 	}
-	// }
-	// localStorage.setItem('tablesList', JSON.stringify(tableList))
+	if (tableIndex !== -1) {
+		// The table was found in the tableList
+		console.log(`Table index: ${tableIndex}`)
+	} else {
+		// The table was not found in the tableList
+		console.log(`Table not found: ${currentTable}`)
+	}
+	localStorage.setItem('tablesList', JSON.stringify(tableList))
 }
 
 function restrictSelected() {
