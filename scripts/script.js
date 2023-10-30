@@ -124,11 +124,13 @@ timeElement.addEventListener('change', (event) => {
 	console.log(currentTime)
 })
 
+renderReservationHours(openingTime, closingTime, tableList)
+renderTables(tableList)
+
 // This function handles the booking of a table for a given time.
 // It toggles the table's visual representation and updates the reservation status.
-function bookTable(table, event) {
+function returnsTableIndex() {
 	let targetElement
-
 	if (!event.target.dataset.table) {
 		targetElement = event.target.parentElement
 		targetElement.dataset.selected = 'true'
@@ -136,22 +138,11 @@ function bookTable(table, event) {
 		targetElement = event.target
 		targetElement.dataset.selected = 'true'
 	}
+
 	targetElement.classList.toggle('bg-orange-400')
-
-	const hoursContainer = document.getElementById('time')
-	const selectedTime = hoursContainer.value
-
 	const currentTable = targetElement.dataset.table
 	const tableIndex = tableList.findIndex((table) => table.table == currentTable)
-
-	if (tableIndex !== -1) {
-		// The table was found in the tableList
-		console.log(`Table index: ${tableIndex}`)
-	} else {
-		// The table was not found in the tableList
-		console.log(`Table not found: ${currentTable}`)
-	}
-	localStorage.setItem('tablesList', JSON.stringify(tableList))
+	return tableIndex
 }
 
 function restrictSelected() {
@@ -159,30 +150,42 @@ function restrictSelected() {
 	return count > 1
 }
 
-renderReservationHours(openingTime, closingTime, tableList)
-renderTables(tableList)
+function returnsTimeIndex(tableIndex) {
+	const selectedTime = document.getElementById('time').value
+	let timeIndex = tableList[tableIndex].reservations
+	timeIndex = timeIndex.findIndex((time) => time.time == selectedTime)
+	return timeIndex
+}
 
 // Event listener for table booking
 const tables = document.querySelectorAll('.table')
 for (const table of tables) {
-	table.addEventListener('click', checkForSelected)
+	table.addEventListener('click', tableBook)
 }
 
-function checkForSelected(event) {
-	const previouslySelected = document.querySelectorAll("[data-selected='true']")
-	const table = event.target.dataset.table
-
-	if (previouslySelected.length === 1) {
-		removeSelected(previouslySelected)
-		bookTable(table, event)
-	} else {
-		bookTable(table, event)
-	}
+function checkForSelected() {
+	const previouslySelectedTables = document.querySelectorAll(
+		"[data-selected='true']"
+	)
+	return previouslySelectedTables
 }
 
 function removeSelected(previouslySelected) {
-	previouslySelected[0].classList.remove('bg-orange-400')
-	previouslySelected[0].dataset.selected = 'false'
+	if (previouslySelected.length > 0) {
+		previouslySelected[0].classList.remove('bg-orange-400')
+		previouslySelected[0].dataset.selected = 'false'
+		return true
+	} else {
+		return false
+	}
+}
+
+function tableBook() {
+	const previouslySelected = checkForSelected()
+	removeSelected(previouslySelected)
+	const tableIndex = returnsTableIndex()
+	const timeIndex = returnsTimeIndex(tableIndex)
+	console.log(timeIndex)
 }
 
 // Todo:
