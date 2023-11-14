@@ -1,4 +1,4 @@
-let tablesList = [
+const tablesList = [
 	{
 		table: 1,
 		seats: 4,
@@ -96,25 +96,50 @@ function renderReservationHours(openingTime, closingTime, tableList) {
 	openHours.forEach((hour, index) => {
 		hoursContainer.insertAdjacentHTML(
 			'beforeend',
-			`<option class="bg-white text-md text-black" data-hour="${index}">${hour}</option>`
+			`<option class=" text-md text-black" data-hour="${index}">${hour}</option>`
 		)
 	})
+	return openHours
 }
-
+let selectedTimeIndex
 // Function to render tables
 function renderTables(tableList) {
 	const tablesContainer = document.getElementById('tables')
+	tablesContainer.innerHTML = ''
 	tableList.forEach((table) => {
-		tablesContainer.insertAdjacentHTML(
-			'beforeend',
-			`
-      <div class="table border p-4 rounded col-span-1 cursor-pointer shadow border-3 hover:bg-green-400 hover:border-gray-500" data-table="${table.table}">
-        <span class="font-bold text-xl">Seats ${table.seats}</span>
-        <p class="mt-2">Table: ${table.table}</p>
-      </div>
-    `
+		const selectedTime = document.getElementById('time').value
+		selectedTimeIndex = table.reservations.findIndex(
+			(reservation) => reservation.time == selectedTime
 		)
+		if (table.reservations[selectedTimeIndex].reserved == true) {
+			console.log(`table ${table.table} booked`)
+			tablesContainer.insertAdjacentHTML(
+				'beforeend',
+				`<div class="border p-4 rounded col-span-1 cursor-not-allowed shadow border-3 bg-red-400 hover:border-gray-500" data-table="${table.table}">
+			<span class="font-bold text-xl">Seats ${table.seats}</span>
+			<p class="mt-2">Table: ${table.table}</p>
+		  </div>
+		`
+			)
+		} else {
+			tablesContainer.insertAdjacentHTML(
+				'beforeend',
+				`
+		  <div class="table border p-4 rounded col-span-1 cursor-pointer shadow border-3 hover:bg-green-400 hover:border-gray-500" data-table="${table.table}">
+			<span class="font-bold text-xl">Seats ${table.seats}</span>
+			<p class="mt-2">Table: ${table.table}</p>
+		  </div>
+		`
+			)
+		}
 	})
+	// Event listener for table booking
+	const tables = document.querySelectorAll('.table')
+	for (const table of tables) {
+		table.addEventListener('click', (event) => {
+			selectedTableIndex = tableSelected(event)
+		})
+	}
 }
 
 // Event listener for time dropdown
@@ -122,6 +147,7 @@ const timeElement = document.getElementById('time')
 timeElement.addEventListener('change', (event) => {
 	currentTime = event.target.value
 	console.log(currentTime)
+	renderTables(tableList)
 })
 
 renderReservationHours(openingTime, closingTime, tableList)
@@ -157,12 +183,6 @@ function returnsTimeIndex(tableIndex) {
 	return timeIndex
 }
 
-// Event listener for table booking
-const tables = document.querySelectorAll('.table')
-for (const table of tables) {
-	table.addEventListener('click', tableBook)
-}
-
 function checkForSelected() {
 	const previouslySelectedTables = document.querySelectorAll(
 		"[data-selected='true']"
@@ -179,25 +199,41 @@ function removeSelected(previouslySelected) {
 		return false
 	}
 }
+let selectedTableIndex = tableSelected()
 
-function tableBook() {
-	removeSelected(checkForSelected())
-	const tableIndex = returnsTableIndex()
-	let timeIndex = returnsTimeIndex(tableIndex)
-	tableList[tableIndex].reservations[timeIndex].reserved = true
+function tableSelected(event) {
+	if (event) {
+		removeSelected(checkForSelected())
+		const tableIndex = returnsTableIndex(event)
+		console.log(tableIndex)
+		return tableIndex
+	}
+	// Handle the initial case where event is not defined
+	return undefined
+}
 
-	for (let i = 0; i <= 2; i++) {
-		timeIndex++
-		tableList[tableIndex].reservations[timeIndex].reserved = true
+document
+	.getElementById('bookBtn')
+	.addEventListener('click', (event) => bookTable())
+
+function bookTable() {
+	if (typeof selectedTableIndex !== 'undefined') {
+		let timeIndex = returnsTimeIndex(selectedTableIndex)
+		tableList[selectedTableIndex].reservations[timeIndex].reserved = true
+		for (let i = 0; i <= 2; i++) {
+			timeIndex++
+			tableList[selectedTableIndex].reservations[timeIndex].reserved = true
+		}
+		saveTableToStorage(tableList)
+	} else {
+		console.error('No table selected')
+		alert('No Table Selected')
 	}
 }
 
-// Todo:
-// Prevent the user from adding more than one table per booking
-
-// Uncaught TypeError: tablesList[tableIndex] is undefined
-
-// Notes:
-
-// The user clicks on a table, bookTable() changes the background color.
-// I should update restrictSelected() to holds a value that cannot be < 1 - if greater than one, prevent background change, and store reservation information
+function saveTableToStorage(tableList) {
+	const string = JSON.stringify(tableList)
+	localStorage.setItem('tablesList', string)
+	renderTables(tableList)
+	alert('table booked')
+}
